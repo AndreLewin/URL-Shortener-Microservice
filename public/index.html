@@ -1,0 +1,42 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+
+<!-- You might want to try something fancier: -->
+<!-- html/nunjucks docs: https://mozilla.github.io/nunjucks/ -->
+<!-- pug: https://pugjs.org/ -->
+<!-- haml: http://haml.info/ -->
+<!-- hbs(handlebars): http://handlebarsjs.com/ -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>URL Shortener Microservice</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Cabin" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/style.css">
+  </head>
+  <body>
+
+    <main>
+      <h1>
+        URL Shortener Microservice
+      </h1>
+      <p>
+        This API gives you a short URL from a long URL
+        <br/><br/>
+        Try these different URLs:
+      </p>
+      <ul>
+        <li><a href="/3-10-2016">/3-10-2016</a></li>
+        <li><a href="/November 8, 2017">/November 8, 2017</a></li>
+        <li><a href="/1510272000000">/1510272000000 (Unix Timestamp)</a></li>
+        <li><a href="/Potatoes">/Potatoes</a></li> 
+      </ul>
+    </main>
+    
+    <script src="/assets/app.js"></script>
+
+  </body>
+</html>
