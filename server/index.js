@@ -2,7 +2,11 @@ const express = require('express');
 const app = express();
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
-const moment = require('moment');
+
+const mongoose = require('mongoose');
+const UrlPair = require('./model/UrlPair');
+mongoose.connect(process.env.DB_URI, { useMongoClient: true });
+mongoose.Promise = global.Promise; 
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
@@ -17,41 +21,55 @@ app.use(webpackDevMiddleware(compiler, {
 
 
 // Create a short URL from an original long URL
-app.get('/new/:original_url', (req, res) => {
+app.get('/new/*', async (req, res) => {
   
   // Get the URL
-  const original_url = req.params.original_url;
-  let short_url = "TO DO";
-  
-  // Check if the URL is already present in the DB
-  
-  
+  const original_url = req.params[0];
+  let short_url = "";
+
   // If the URL is present, return the shortened link
+  const urlPairMatch = await UrlPair.findOne({"original_url": original_url});
+  if (urlPairMatch) {
+    short_url = urlPairMatch.short_url;
+  }
   
   // If the URL is absent, create a random shortened link
   // Check if the shortened link is already present in the DB, if so, try again
-  // If the shortened link is not present, add the new entry to the DB, and return the shortened link
+  else {
+    let randomNumber = Math.floor(Math.random() * 1000000);
+    for (let i=0; i < 10; i++) {
+      if (!(await UrlPair.findOne({"short_url": randomNumber}))) { break };
+      randomNumber = Math.floor(Math.random() * 1000000);
+    }
+    
+    short_url = randomNumber;
+    
+    // Add the new pair to the database
+    const urlPair = new UrlPair({ original_url:original_url , short_url:short_url });
+    urlPair.save();
+  }
   
-  
-  // Send the shortened link to the user
-  res.json({original_url:original_url, short_url:short_url});
+  // Display the original and short links for the user
+  res.json({
+    original_url:req.protocol + '://' + req.hostname + '/new/' + original_url,
+    short_url:req.protocol + '://' + req.hostname + '/' + short_url
+  });
 });
 
 
 // Redirect based on the short URL recieved
-app.get('/:short_url', (req, res) => {
+app.get('/:short_url', async (req, res) => {
 
   const short_url = req.params.short_url;
-  let original_url = "to do";
   
   // Find in the DB the original URL
-  // original_url = queryResult;
+  const original_pair = await UrlPair.findOne({ short_url: short_url });
   
-  // If an original_url is found, redirect or throw 404
-  if (original_url) {
-    res.json({original_url:original_url});
+  if (original_pair) {
+    res.redirect(original_pair.original_url);
   } else {
-    res.status(404);
+    res.status(404).json({ error: 'No URL found for this short code'});
+    console.log(res);
     res.end();
   }
 });
